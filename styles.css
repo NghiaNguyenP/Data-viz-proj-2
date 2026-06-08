@@ -93,7 +93,9 @@ body {
 .nav-item {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   min-height: 42px;
+  width: 100%;
   border: 0;
   border-radius: 8px;
   color: rgba(255, 255, 255, 0.78);
@@ -102,11 +104,23 @@ body {
   padding: 0 12px;
   font-weight: 700;
   text-decoration: none;
+  box-shadow: none;
+}
+
+.nav-item.btn,
+.nav-item.btn:active {
+  color: rgba(255, 255, 255, 0.78);
+  background: transparent;
+  border: 0;
+  box-shadow: none;
 }
 
 .nav-item.active,
 .nav-item:hover,
-.nav-item:focus {
+.nav-item:focus,
+.nav-item.btn.active,
+.nav-item.btn:hover,
+.nav-item.btn:focus {
   color: #fff;
   background: rgba(37, 99, 235, 0.32);
   text-decoration: none;
@@ -258,6 +272,13 @@ h1 {
   font-weight: 900;
 }
 
+.kpi-symbol svg {
+  display: block;
+  width: 22px;
+  height: 22px;
+  color: var(--blue);
+}
+
 .kpi-card span,
 .kpi-card small {
   display: block;
@@ -279,6 +300,23 @@ h1 {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   gap: 14px;
+}
+
+.map-page-grid .wide-panel {
+  grid-column: 1 / -1;
+  min-height: 560px;
+}
+
+.map-page-grid .chart-widget,
+.map-page-grid .chart-widget .js-plotly-plot,
+.map-page-grid .chart-widget .plot-container,
+.map-page-grid .chart-widget .svg-container {
+  min-height: 470px !important;
+}
+
+.pipeline-page-grid .wide-panel,
+.compare-page-grid .wide-panel {
+  grid-column: span 6;
 }
 
 .panel {
@@ -394,12 +432,79 @@ h1 {
   overflow: hidden;
 }
 
+.query-grid {
+  display: grid;
+  grid-template-columns: minmax(260px, 2fr) repeat(3, minmax(180px, 1fr));
+  gap: 14px;
+  align-items: end;
+  margin-bottom: 14px;
+  padding: 15px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.query-grid .form-label,
+.query-grid .control-label {
+  color: var(--muted);
+}
+
+.query-grid .form-control,
+.query-grid .form-select {
+  color: var(--ink);
+  background-color: #fff;
+  border-color: var(--line);
+}
+
 .explorer-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) auto;
+  align-items: start;
   gap: 14px;
   margin-bottom: 12px;
+}
+
+.explorer-header > div:first-child {
+  min-width: 0;
+}
+
+.explorer-header h2 {
+  max-width: none;
+  white-space: normal;
+}
+
+.explorer-header p {
+  max-width: none;
+}
+
+.explorer-header .secondary-button,
+.explorer-header a.secondary-button,
+.explorer-header .btn.secondary-button,
+.explorer-header > a,
+.explorer-header > button,
+.explorer-header > form {
+  justify-self: end;
+  width: auto !important;
+  min-width: 96px;
+  max-width: 116px;
+  min-height: 32px;
+  padding: 6px 12px;
+  font-size: 12px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.explorer-header > form {
+  margin: 0;
+  padding: 0;
+}
+
+.explorer-header > form .secondary-button,
+.explorer-header > form .btn {
+  width: auto !important;
+  min-width: 96px;
+  max-width: 116px;
 }
 
 .explorer-panel .shiny-bound-output,
@@ -414,6 +519,18 @@ h1 {
 .explorer-panel .shiny-data-frame,
 .explorer-panel .shiny-data-grid {
   overflow-x: auto;
+}
+
+.explorer-panel .shiny-data-frame table,
+.explorer-panel .shiny-data-grid table {
+  table-layout: fixed;
+}
+
+.explorer-panel th,
+.explorer-panel td {
+  vertical-align: middle;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 @media (max-width: 1180px) {
@@ -454,6 +571,16 @@ h1 {
     grid-column: span 6;
   }
 
+  .map-page-grid .wide-panel,
+  .pipeline-page-grid .wide-panel,
+  .compare-page-grid .wide-panel {
+    grid-column: span 6;
+  }
+
+  .query-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .insight-row-panel .insight-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -483,6 +610,16 @@ h1 {
   .compact-panel,
   .insight-row-panel {
     grid-column: auto;
+  }
+
+  .map-page-grid .wide-panel,
+  .pipeline-page-grid .wide-panel,
+  .compare-page-grid .wide-panel {
+    grid-column: auto;
+  }
+
+  .query-grid {
+    grid-template-columns: 1fr;
   }
 
   .insight-row-panel .insight-list {

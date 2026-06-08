@@ -150,10 +150,44 @@ def polish_fig(fig: go.Figure, height: int | None = None, legend: bool = False) 
     return fig
 
 
-def kpi_card(label: str, output_id: str, caption: str, icon: str) -> ui.Tag:
+KPI_ICONS = {
+    "startups": """
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="4" y="4" width="16" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
+          <path d="M8 4v16M12 4v16M16 4v16M4 8h16M4 12h16M4 16h16" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+    """,
+    "founders": """
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.4"/>
+          <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2.2"/>
+        </svg>
+    """,
+    "schools": """
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 3l9 7-9 7-9-7 9-7z" fill="none" stroke="currentColor" stroke-width="2"/>
+          <path d="M12 8l4 3-4 3-4-3 4-3z" fill="none" stroke="currentColor" stroke-width="1.8"/>
+        </svg>
+    """,
+    "companies": """
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="5" y="6" width="14" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
+          <rect x="9" y="10" width="6" height="6" fill="none" stroke="currentColor" stroke-width="2"/>
+        </svg>
+    """,
+    "regions": """
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/>
+          <path d="M12 4c2.2 2.2 3.2 5 3.2 8s-1 5.8-3.2 8M12 4c-2.2 2.2-3.2 5-3.2 8s1 5.8 3.2 8M4 12h16" fill="none" stroke="currentColor" stroke-width="1.6"/>
+        </svg>
+    """,
+}
+
+
+def kpi_card(label: str, output_id: str, caption: str, icon_key: str) -> ui.Tag:
     return ui.tags.article(
         {"class": "kpi-card"},
-        ui.tags.div(icon, class_="kpi-symbol"),
+        ui.tags.div(ui.HTML(KPI_ICONS[icon_key]), class_="kpi-symbol"),
         ui.tags.div(
             ui.tags.span(label),
             ui.tags.strong(ui.output_text(output_id)),
@@ -191,10 +225,168 @@ def chart_panel(
     )
 
 
+def page_header(title: str, subtitle: str) -> ui.Tag:
+    return ui.tags.header(
+        ui.tags.div(
+            ui.tags.h1(title),
+            ui.tags.p(subtitle),
+        ),
+        class_="topbar",
+    )
+
+
+def kpi_section() -> ui.Tag:
+    return ui.tags.section(
+        kpi_card("Total startups", "kpi_startups", "Filtered companies", "startups"),
+        kpi_card("Total founders", "kpi_founders", "Estimated people", "founders"),
+        kpi_card("Schools", "kpi_schools", "Contributing schools", "schools"),
+        kpi_card("Prior companies", "kpi_companies", "Previous employers", "companies"),
+        kpi_card("Regions", "kpi_regions", "Startup locations", "regions"),
+        class_="kpi-grid",
+    )
+
+
+def insights_panel() -> ui.Tag:
+    return ui.tags.article(
+        {"class": "panel insight-row-panel"},
+        ui.tags.div(
+            ui.tags.div(
+                ui.tags.h2("Ecosystem Insights"),
+                ui.tags.p("Auto-updated summary."),
+            ),
+            class_="panel-header",
+        ),
+        ui.output_ui("insights"),
+    )
+
+
+def dashboard_page() -> ui.Tag:
+    return ui.tags.div(
+        page_header(
+            "Startup Ecosystem Overview",
+            "High-level founder and sector signals for the filtered YC-backed startup sample.",
+        ),
+        kpi_section(),
+        ui.tags.section(
+            chart_panel("Top Founder Schools", "Ranked by founder count.", "school_chart"),
+            chart_panel("Sector Trends Across Batches", "Share of startups by YC batch.", "trend_chart", wide=True),
+            chart_panel("Prior Company Experience", "Previous employers feeding into YC startups.", "company_chart"),
+            insights_panel(),
+            class_="dashboard-grid",
+        ),
+    )
+
+
+def map_page() -> ui.Tag:
+    return ui.tags.div(
+        page_header(
+            "Global Ecosystem Map",
+            "A dedicated spatial view with standard Plotly map interaction.",
+        ),
+        ui.tags.section(
+            chart_panel(
+                "Global Founder / Startup Concentration",
+                "Bubble size shows filtered startup density by region. Drag and zoom to explore.",
+                "map_chart",
+                wide=True,
+            ),
+            class_="dashboard-grid map-page-grid",
+        ),
+    )
+
+
+def pipeline_page() -> ui.Tag:
+    return ui.tags.div(
+        page_header(
+            "Founder Pipeline",
+            "Trace founder movement from school and prior employer into startup sector and outcome.",
+        ),
+        ui.tags.section(
+            chart_panel(
+                "Founder Pipeline",
+                "School -> prior company -> sector -> outcome.",
+                "pipeline_chart",
+                wide=True,
+            ),
+            chart_panel(
+                "Founder Network",
+                "Schools, prior companies, founders, and startups as linked nodes.",
+                "network_chart",
+                wide=True,
+            ),
+            class_="dashboard-grid pipeline-page-grid",
+        ),
+    )
+
+
+def compare_page() -> ui.Tag:
+    return ui.tags.div(
+        page_header(
+            "Compare Sectors & Batches",
+            "Compare sector landscapes, funding movement, and batch-level trends.",
+        ),
+        ui.tags.section(
+            chart_panel(
+                "Market Map / Sector Landscape",
+                "Treemap grouped by sector and startup theme.",
+                "market_map_chart",
+                wide=True,
+            ),
+            chart_panel(
+                "Animated Batch Timeline",
+                "Funding and sector movement across YC batches.",
+                "timeline_chart",
+                wide=True,
+            ),
+            class_="dashboard-grid compare-page-grid",
+        ),
+    )
+
+
+def explorer_page() -> ui.Tag:
+    return ui.tags.div(
+        page_header(
+            "Startup / Founder Explorer",
+            "Query, inspect, and export individual startup and founder records.",
+        ),
+        ui.tags.section(
+            ui.input_text("table_search", "Table search", placeholder="Founder, startup, theme..."),
+            ui.input_select("school_query", "School", ["All"] + sorted(DATA["School"].unique().tolist())),
+            ui.input_select("company_query", "Prior company", ["All"] + sorted(DATA["Prior Company"].unique().tolist())),
+            ui.input_numeric("min_funding", "Min funding ($M)", value=0, min=0, step=5),
+            class_="query-grid",
+        ),
+        ui.tags.section(
+            ui.tags.div(
+                ui.tags.div(
+                    ui.tags.h2("Startup / Founder Explorer"),
+                    ui.tags.p(ui.output_text("result_count")),
+                ),
+                ui.download_button("download_csv", "Export CSV", class_="secondary-button"),
+                class_="explorer-header",
+            ),
+            ui.output_data_frame("records_table"),
+            class_="explorer-panel",
+        ),
+    )
+
+
 app_ui = ui.page_fluid(
     ui.tags.head(
         ui.tags.title("FounderRadar Shiny Dashboard"),
         ui.tags.link(rel="stylesheet", href="styles.css"),
+        ui.tags.script(
+            """
+            document.addEventListener('click', function(event) {
+              const item = event.target.closest('.nav-item');
+              if (!item) return;
+              document.querySelectorAll('.nav-item').forEach((el) => el.classList.remove('active'));
+              item.classList.add('active');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+
+            """
+        ),
     ),
     ui.tags.div(
         {"class": "app-shell"},
@@ -206,10 +398,11 @@ app_ui = ui.page_fluid(
                 class_="brand-block",
             ),
             ui.tags.nav(
-                ui.tags.a("Overview", href="#overview-section", class_="nav-item active"),
-                ui.tags.a("Founders", href="#founders-section", class_="nav-item"),
-                ui.tags.a("Pipeline", href="#pipeline-section", class_="nav-item"),
-                ui.tags.a("Compare", href="#compare-section", class_="nav-item"),
+                ui.input_action_button("nav_dashboard", "Dashboard", class_="nav-item active"),
+                ui.input_action_button("nav_map", "Global Map", class_="nav-item"),
+                ui.input_action_button("nav_explorer", "Explorer", class_="nav-item"),
+                ui.input_action_button("nav_pipeline", "Pipeline", class_="nav-item"),
+                ui.input_action_button("nav_compare", "Compare", class_="nav-item"),
                 class_="nav-list",
             ),
             ui.tags.section(
@@ -225,105 +418,48 @@ app_ui = ui.page_fluid(
         ),
         ui.tags.main(
             {"class": "main"},
-            ui.tags.header(
-                {"id": "overview-section"},
-                ui.tags.div(
-                    ui.tags.h1("Startup Ecosystem Overview"),
-                    ui.tags.p("Explore founder, startup, and ecosystem patterns in YC-backed companies."),
-                ),
-                class_="topbar",
-            ),
-            ui.tags.section(
-                kpi_card("Total startups", "kpi_startups", "Filtered companies", "▦"),
-                kpi_card("Total founders", "kpi_founders", "Estimated people", "◎"),
-                kpi_card("Schools", "kpi_schools", "Contributing schools", "◈"),
-                kpi_card("Prior companies", "kpi_companies", "Previous employers", "▣"),
-                kpi_card("Regions", "kpi_regions", "Startup locations", "◌"),
-                class_="kpi-grid",
-            ),
-            ui.tags.section(
-                chart_panel(
-                    "Global Founder / Startup Concentration",
-                    "Bubble size shows filtered startup density by region.",
-                    "map_chart",
-                    wide=True,
-                ),
-                chart_panel(
-                    "Top Founder Schools",
-                    "Ranked by founder count.",
-                    "school_chart",
-                    section_id="founders-section",
-                ),
-                chart_panel(
-                    "Sector Trends Across Batches",
-                    "Share of startups by YC batch.",
-                    "trend_chart",
-                ),
-                chart_panel(
-                    "Prior Company Experience",
-                    "Previous employers feeding into YC startups.",
-                    "company_chart",
-                ),
-                chart_panel(
-                    "Founder Pipeline",
-                    "School -> prior company -> sector -> outcome.",
-                    "pipeline_chart",
-                    wide=True,
-                    section_id="pipeline-section",
-                ),
-                chart_panel(
-                    "Market Map / Sector Landscape",
-                    "Treemap grouped by sector and startup theme.",
-                    "market_map_chart",
-                    section_id="compare-section",
-                ),
-                chart_panel(
-                    "Founder Network",
-                    "Schools, prior companies, founders, and startups as linked nodes.",
-                    "network_chart",
-                    wide=True,
-                ),
-                chart_panel(
-                    "Ecosystem Globe",
-                    "Orthographic map view for global ecosystem density.",
-                    "globe_chart",
-                ),
-                chart_panel(
-                    "Animated Batch Timeline",
-                    "Funding and sector movement across YC batches.",
-                    "timeline_chart",
-                ),
-                ui.tags.article(
-                    {"class": "panel insight-row-panel"},
-                    ui.tags.div(
-                        ui.tags.div(
-                            ui.tags.h2("Ecosystem Insights"),
-                            ui.tags.p("Auto-updated summary."),
-                        ),
-                        class_="panel-header",
-                    ),
-                    ui.output_ui("insights"),
-                ),
-                class_="dashboard-grid",
-            ),
-            ui.tags.section(
-                ui.tags.div(
-                    ui.tags.div(
-                        ui.tags.h2("Startup / Founder Explorer"),
-                        ui.tags.p(ui.output_text("result_count")),
-                    ),
-                    ui.download_button("download_csv", "Export CSV", class_="secondary-button"),
-                    class_="explorer-header",
-                ),
-                ui.output_data_frame("records_table"),
-                class_="explorer-panel",
+            ui.navset_hidden(
+                ui.nav_panel("Dashboard", dashboard_page(), value="dashboard"),
+                ui.nav_panel("Global Map", map_page(), value="map"),
+                ui.nav_panel("Explorer", explorer_page(), value="explorer"),
+                ui.nav_panel("Pipeline", pipeline_page(), value="pipeline"),
+                ui.nav_panel("Compare", compare_page(), value="compare"),
+                id="main_nav",
+                selected="dashboard",
             ),
         ),
     ),
 )
 
-
 def server(input, output, session):
+    def switch_page(page: str):
+        ui.update_navs("main_nav", selected=page)
+
+    @reactive.effect
+    @reactive.event(input.nav_dashboard)
+    def _nav_dashboard():
+        switch_page("dashboard")
+
+    @reactive.effect
+    @reactive.event(input.nav_map)
+    def _nav_map():
+        switch_page("map")
+
+    @reactive.effect
+    @reactive.event(input.nav_explorer)
+    def _nav_explorer():
+        switch_page("explorer")
+
+    @reactive.effect
+    @reactive.event(input.nav_pipeline)
+    def _nav_pipeline():
+        switch_page("pipeline")
+
+    @reactive.effect
+    @reactive.event(input.nav_compare)
+    def _nav_compare():
+        switch_page("compare")
+
     @reactive.effect
     @reactive.event(input.reset)
     def _reset_filters():
@@ -332,6 +468,10 @@ def server(input, output, session):
         ui.update_select("region", selected="All")
         ui.update_select("outcome", selected="All")
         ui.update_text("search", value="")
+        ui.update_text("table_search", value="")
+        ui.update_select("school_query", selected="All")
+        ui.update_select("company_query", selected="All")
+        ui.update_numeric("min_funding", value=0)
 
     @reactive.calc
     def filtered_data() -> pd.DataFrame:
@@ -359,6 +499,31 @@ def server(input, output, session):
                 .str.lower()
             )
             df = df[haystack.str.contains(query, regex=False)]
+
+        return df
+
+    @reactive.calc
+    def explorer_data() -> pd.DataFrame:
+        df = filtered_data().copy()
+
+        table_query = input.table_search().strip().lower()
+        if table_query:
+            haystack = (
+                df[["Startup", "Founder", "Theme", "School", "Prior Company", "Sector", "Region"]]
+                .astype(str)
+                .agg(" ".join, axis=1)
+                .str.lower()
+            )
+            df = df[haystack.str.contains(table_query, regex=False)]
+
+        if input.school_query() != "All":
+            df = df[df["School"] == input.school_query()]
+
+        if input.company_query() != "All":
+            df = df[df["Prior Company"] == input.company_query()]
+
+        if input.min_funding() is not None:
+            df = df[df["Funding M"] >= float(input.min_funding())]
 
         return df
 
@@ -390,7 +555,7 @@ def server(input, output, session):
     @output
     @render.text
     def result_count():
-        return f"Showing {len(filtered_data()):,} filtered records"
+        return f"Showing {len(explorer_data()):,} queried records"
 
     @output
     @render_widget
@@ -508,6 +673,10 @@ def server(input, output, session):
 
         fig.update_geos(
             projection_type="natural earth",
+            lataxis=dict(range=[-58, 82]),
+            lonaxis=dict(range=[-180, 180]),
+            projection_rotation=dict(lon=0, lat=0, roll=0),
+            center=dict(lat=15, lon=0),
             showcountries=True,
             countrycolor="#D9DEE8",
             showland=True,
@@ -515,6 +684,10 @@ def server(input, output, session):
             showocean=True,
             oceancolor="#F5F7FB",
             bgcolor="rgba(0,0,0,0)",
+        )
+        fig.update_layout(
+            dragmode="pan",
+            uirevision="interactive-global-map",
         )
 
         return polish_fig(fig)
@@ -944,7 +1117,7 @@ def server(input, output, session):
     @output
     @render.data_frame
     def records_table():
-        table_df = filtered_data().drop(
+        table_df = explorer_data().drop(
             columns=["Founder Count", "Longitude", "Latitude"],
             errors="ignore",
         )
@@ -958,7 +1131,8 @@ def server(input, output, session):
 
     @render.download(filename="founderradar_filtered_records.csv")
     def download_csv():
-        yield filtered_data().to_csv(index=False)
+        yield explorer_data().to_csv(index=False)
 
 
 app = App(app_ui, server, static_assets=APP_DIR)
+
